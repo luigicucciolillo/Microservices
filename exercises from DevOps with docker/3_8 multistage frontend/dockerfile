@@ -1,0 +1,43 @@
+#FROM node:14
+FROM node:14-alpine as builder
+WORKDIR /app
+COPY package*.json ./
+COPY . .
+# AFTER REFORMAT FOR SHORTER IMAGE ****************************
+#RUN apt-get update && apt-get install -y xsel \
+#    && npm install \
+#    && npm install react-scripts --save \
+#    && npm run build \
+#    && groupadd appgroup && useradd -m -g appgroup appuser
+# *************************************************************
+# BEFORE REFORMAT FOR SHORTER IMAGE ***************************
+#RUN apt-get update && apt-get install -y xse
+#RUN npm install
+#RUN npm install react-scripts --save
+#RUN npm run build
+#RUN groupadd appgroup && useradd -m -g appgroup appuser
+# *************************************************************
+# ALPINE COMPATIBLE REFORMAT FOR SHORTER IMAGE ****************
+#RUN apk add --no-cache xsel \
+#&& npm install \
+#&& npm install react-scripts --save \
+#&& npm run build \
+#&& addgroup -S appgroup && adduser -S appuser -G appgrou
+# ************************************************************
+# 3.8 MULTI STAGE *********************************************
+# Stage 1: Build Stage
+# Install dependencies and build the project
+RUN apk add --no-cache xsel \
+    && npm install \
+    && npm install react-scripts --sav
+RUN npm run build
+# Stage 2: Production Stage
+FROM node:14-alpine
+WORKDIR /app
+# Copy only the build output from the previous stage
+COPY --from=builder /app/build ./buil
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+# *************************************************************
+EXPOSE 5000
+USER appuser
+CMD ["serve", "-s", "-l", "5000", "build"]
